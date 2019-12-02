@@ -1,11 +1,26 @@
 use math::round;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 
-fn main() {}
+fn main() {
+    let filename = "src/input.txt";
+    let file = File::open(filename).unwrap();
+    let reader = BufReader::new(file);
 
-pub fn calculate_fuel(mass: i32) -> i32 {
+    let fuel_needed: Vec<u32> = reader
+        .lines()
+        .map(|line| {
+            let line = line.unwrap();
+            calculate_fuel(line.parse::<u32>().unwrap())
+        })
+        .collect();
+        
+    println!("Total fuel required, {:?}", fuel_needed.iter().sum::<u32>());
+}
+
+pub fn calculate_fuel(mass: u32) -> u32 {
     let rounded = round::floor(f64::from(mass / 3), 0);
-    println!("{}", rounded);
-    rounded as i32 - 2
+    rounded as u32 - 2
 }
 
 #[cfg(test)]
