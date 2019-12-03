@@ -22,22 +22,18 @@ fn part_one(input: &mut Vec<u32>) {
 
 fn part_two(input: &mut Vec<u32>) {
     let goal = 19690720;
-    let mut resulting_noun = 0;
-    let mut resulting_verb = 0;
     for noun in 0..99usize {
         for verb in 0..99usize {
             if process_program(&mut input.clone(), noun as u32, verb as u32)[0usize] == goal {
-                resulting_noun = noun;
-                resulting_verb = verb;
+                println!(
+                    "Part 2: Noun: {}, Verb: {}, Result: {}",
+                    noun,
+                    verb,
+                    100 * noun + verb
+                );
             }
         }
     }
-    println!(
-        "Part 2: Noun: {}, Verb: {}, Result: {}",
-        resulting_noun,
-        resulting_verb,
-        100 * resulting_noun + resulting_verb
-    );
 }
 
 pub fn process_program(program: &mut Vec<u32>, noun: u32, verb: u32) -> &mut Vec<u32> {
