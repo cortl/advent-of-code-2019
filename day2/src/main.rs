@@ -17,14 +17,14 @@ fn main() {
 }
 
 fn part_one(input: &mut Vec<u32>) {
-    println!("Part 1: {}", process_program(input, 12, 2)[0]);
+    println!("Part 1: {}", process_program(input)[0]);
 }
 
 fn part_two(input: &mut Vec<u32>) {
     let goal = 19690720;
     for noun in 0..99usize {
         for verb in 0..99usize {
-            if process_program(&mut input.clone(), noun as u32, verb as u32)[0usize] == goal {
+            if process(&mut input.clone(), noun as u32, verb as u32)[0usize] == goal {
                 println!(
                     "Part 2: Noun: {}, Verb: {}, Result: {}",
                     noun,
@@ -36,9 +36,13 @@ fn part_two(input: &mut Vec<u32>) {
     }
 }
 
-pub fn process_program(program: &mut Vec<u32>, noun: u32, verb: u32) -> &mut Vec<u32> {
+fn process(program: &mut Vec<u32>, noun: u32, verb: u32) -> &mut Vec<u32> {
     program[1] = noun;
     program[2] = verb;
+    process_program(program)
+}
+
+pub fn process_program(program: &mut Vec<u32>) -> &mut Vec<u32> {
     let mut i = 0usize;
     loop {
         let opcode = *program.get(i).unwrap();
