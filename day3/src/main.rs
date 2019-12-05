@@ -1,5 +1,5 @@
-use array_tool::vec::Intersect;
 use std::cmp::PartialEq;
+use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 use std::fs::File;
@@ -8,7 +8,7 @@ use std::num::ParseIntError;
 use std::str::FromStr;
 
 fn main() {
-    let mut line_rdr = BufReader::new(File::open("src/input.txt").unwrap()).lines();
+    let mut line_rdr = BufReader::new(File::open("input.txt").unwrap()).lines();
     let mut wires = Vec::new();
     while let Some(Ok(line)) = line_rdr.next() {
         let wire: Vec<Direction> = line.split(',').map(|s| s.parse().unwrap()).collect();
@@ -17,27 +17,41 @@ fn main() {
 
     let mut wire_maps = Vec::new();
     for wire in &wires {
-        let mut wire_points = Vec::new();
+        let mut wire_points = HashMap::new();
         let mut pos = (0, 0);
+        let mut dist = 0;
         for dir in wire {
             for _ in 0..dir.len() {
+                dist += 1;
                 pos = dir.mv(pos);
-                wire_points.push(pos);
+                wire_points.entry(pos).or_insert(dist);
             }
         }
         wire_maps.push(wire_points);
     }
-
-    let intersecting_points: Vec<Position> =
-        wire_maps[0].intersect_if(wire_maps[1].clone(), |l, r| l.0 == r.0 && l.1 == r.1);
-
+    let intersecting_points: Vec<_> = wire_maps[0]
+        .keys()
+        .filter(|position| wire_maps[1].contains_key(position))
+        .map(|position| *position)
+        .collect();
+    // part one
     let mut distances: Vec<i32> = intersecting_points
         .iter()
         .map(|pos| pos.0.abs() + pos.1.abs())
         .collect();
     distances.sort();
-
     println!("Part 1: {}", distances[0]);
+
+    // part two
+    let minimum_position = intersecting_points
+        .iter()
+        .min_by_key(|&p| wire_maps[0][p] + wire_maps[1][p])
+        .unwrap();
+
+    println!(
+        "Part 2: {}",
+        wire_maps[0][minimum_position] + wire_maps[1][minimum_position]
+    );
 }
 
 type Position = (i32, i32); // (x, y)
@@ -135,18 +149,6 @@ impl FromStr for Direction {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use array_tool::vec::Intersect;
-
-    #[test]
-    fn parse_stuff() {
-        let input = vec![(0, 1), (0, 2)];
-        let input2 = vec![(0, 4), (0, 3), (0, 2)];
-
-        assert_eq!(
-            input.intersect_if(input2, |l, r| l.0 == r.0 && l.1 == r.1),
-            vec![(0, 2)]
-        );
-    }
 
     #[test]
     fn parse_up() {
