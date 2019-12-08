@@ -16,3 +16,6 @@
 - [Problem](https://adventofcode.com/2019/day/4)
 - [Solution](./day4/src/main.rs)
 
+## Day 5
+- [Problem](https://adventofcode.com/2019/day/5)
+- [Solution](./day5/src/main.rs)
