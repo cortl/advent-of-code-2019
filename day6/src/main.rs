@@ -7,6 +7,7 @@ fn main() -> Result<()> {
     let orbits: Vec<Orbit> = from_file("input.txt")?;
     let map: OrbitsMap = OrbitsMap::from_orbits(orbits);
     println!("Part 1: {}", map.get_orbits_count());
+    println!("Part 2: {}", map.get_dist_between("YOU", "SAN"));
     Ok(())
 }
 
@@ -59,6 +60,29 @@ impl OrbitsMap {
         };
         // println!("      weight: {}", weight);
         weight
+    }
+
+    fn get_parents(&self, mut satellite: String) -> Vec<String> {
+        let mut parents: Vec<String> = Vec::new();
+        while let Some(parent) = self.relations.get(&satellite) {
+            parents.push(parent.clone());
+            satellite = parent.clone();
+        }
+        parents
+    }
+
+    fn get_dist_between(&self, sat1: &str, sat2: &str) -> usize {
+        let sat1_parents = self.get_parents(String::from(sat1));
+        let sat2_parents = self.get_parents(String::from(sat2));
+        let sat1_common_parent_index: usize = sat1_parents
+            .iter()
+            .position(|parent| sat2_parents.contains(parent))
+            .unwrap();
+        let sat2_common_parent_index: usize = sat2_parents
+            .iter()
+            .position(|parent| parent == &sat1_parents[sat1_common_parent_index])
+            .unwrap();
+        sat1_common_parent_index + sat2_common_parent_index
     }
 }
 
