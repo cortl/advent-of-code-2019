@@ -4,7 +4,7 @@ use std::io::prelude::*;
 use std::io::{BufReader, Result};
 
 fn main() -> Result<()> {
-    let prog = IntCodeProg::from_file("input.txt")?;
+    let prog = IntCodeProg::from_file("input.txt", 5)?;
 
     prog.take_while(|result| match result {
         OpResult::Error => panic!("Error"),
@@ -42,10 +42,11 @@ enum OpResult {
 struct IntCodeProg {
     instrs: Vec<Instr>,
     pc: usize,
+    input: i32
 }
 
 impl IntCodeProg {
-    fn from_file(path: &str) -> Result<IntCodeProg> {
+    fn from_file(path: &str, input: i32) -> Result<IntCodeProg> {
         let f = File::open(path)?;
         let f = BufReader::new(f);
 
@@ -59,6 +60,7 @@ impl IntCodeProg {
         return Ok(IntCodeProg {
             instrs: instrs,
             pc: 0,
+            input: input
         });
     }
 
@@ -83,8 +85,42 @@ impl IntCodeProg {
         let (result, next_pc) = match self.opcode() {
             1 => (self.set(3, self.param(1) + self.param(2)), self.pc + 4),
             2 => (self.set(3, self.param(1) * self.param(2)), self.pc + 4),
-            3 => (self.set(1, 1), self.pc + 2),
+            3 => (self.set(1, self.input), self.pc + 2),
             4 => (OpResult::Print(format!("{}", self.param(1))), self.pc + 2),
+            5 => (
+                OpResult::Unit,
+                match self.param(1) != 0 {
+                    true => self.param(2) as usize,
+                    false => self.pc + 3,
+                },
+            ),
+            6 => (
+                OpResult::Unit,
+                match self.param(1) == 0 {
+                    true => self.param(2) as usize,
+                    false => self.pc + 3,
+                },
+            ),
+            7 => (
+                self.set(
+                    3,
+                    match self.param(1) < self.param(2) {
+                        true => 1,
+                        false => 0,
+                    },
+                ),
+                self.pc + 4,
+            ),
+            8 => (
+                self.set(
+                    3,
+                    match self.param(1) == self.param(2) {
+                        true => 1,
+                        false => 0,
+                    },
+                ),
+                self.pc + 4,
+            ),
             99 => (OpResult::End, 0),
             _ => (OpResult::Error, 0),
         };
